@@ -1,4 +1,7 @@
 # telegram-crypto_bot
+### Info
+
+The goal of this Telegram bot is to give the user current price of the cryptocurrencies from Turkish exchanges. Bot currently supports 4 biggest Turkish exchanges : *Paribu, BTCTurk, Koineks, Koinim.* After getting data from exchanges' API, SQLite used for data storing purposes. 
 
 ### Prerequisites
 
