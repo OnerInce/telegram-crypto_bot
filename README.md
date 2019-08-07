@@ -1,1 +1,1 @@
-# telegram-crpyto_bot
+# telegram-crypto_bot
