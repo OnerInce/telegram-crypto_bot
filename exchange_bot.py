@@ -57,8 +57,13 @@ def get_last_chat_id_and_text(updates):
 	last_update = num_updates - 1
 	chat_id = updates["result"][last_update]["message"]["chat"]["id"]
 	name = updates["result"][last_update]["message"]["chat"]["first_name"]
-	language = updates["result"][last_update]["message"]["from"]["language_code"]
 	last_update_id = updates["result"][last_update]["update_id"]
+	
+	# In case of a language_code error
+	try:
+		language = updates["result"][last_update]["message"]["from"]["language_code"]
+	except:
+		language = "tr"
 	
 	greeting = translate("Merhaba ", language) + name.capitalize() + "\n"
 		
