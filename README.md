@@ -1,7 +1,7 @@
 # telegram-crypto_bot
 ### Info
 
-The goal of this Telegram bot is to give the user current price of the cryptocurrencies from Turkish exchanges. Bot currently supports 4 biggest Turkish exchanges : *Paribu, BTCTurk, Koineks, Koinim.* After getting data from exchanges' API, SQLite used for data storing purposes. Database is updated in every 90 seconds to avoid a rate-limit from exchanges.
+The goal of this Telegram bot is to give the user current price of the cryptocurrencies from Turkish exchanges. Bot currently supports 4 biggest Turkish exchanges : *Paribu, BTCTurk, Koineks, Koinim.* After getting data from exchanges' API, SQLite used for data storing purposes. Database is updated in every 90 seconds to avoid a rate-limit from exchanges. **Prices are given as Turkish Lira (TRY).**
 
 ### Prerequisites
 
@@ -10,6 +10,13 @@ To use this bot, you'll need a Python installation, with a proper Telegram bot T
 * [Python](https://www.python.org/downloads/)
 * [CoinMarketCap API](https://pro.coinmarketcap.com/signup/)
 * [Telegram Bot Token](https://core.telegram.org/bots#creating-a-new-bot)
+
+### Usage
+
+Enter the coin symbol without slash or something i.e. "eth" (without quotes, case doesn't matter). And bot replies you with information. Because of some coins are not present in all exchanges, only the exchanges that has specific coin shows up in bot's reply. 
+
+<img src="/pics/xrp.jpg" width="420" height="170">  <img src="/pics/eth.jpg" width="420" height="170">
+
 
 ### Future Goals
 
