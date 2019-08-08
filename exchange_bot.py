@@ -21,11 +21,30 @@ if len(TOKEN) != 45:
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 def create_db():
-
-	cur.execute('DROP TABLE IF EXISTS Prices')
-
-	cur.execute('''
-	CREATE TABLE IF NOT EXISTS Prices (Time DATE, Coin TEXT, Exchange TEXT, Price INTEGER, Change FLOAT)''')
+	
+	cur.executescript('''
+	DROP TABLE IF EXISTS Coin;
+	DROP TABLE IF EXISTS Exchange;
+	DROP TABLE IF EXISTS Price;
+	
+	CREATE TABLE Coin (
+		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+		name TEXT
+	);
+	
+	CREATE TABLE Exchange (
+		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+		name TEXT UNIQUE 
+	);
+	
+	CREATE TABLE Price (
+		Time DATE,
+		coin_id INTEGER, 
+		exchange_id INTEGER, 
+		Price INTEGER, 
+		Change FLOAT,
+		PRIMARY KEY (coin_id, exchange_id)
+	)''')
 
 
 def get_json_from_url(url):
@@ -118,7 +137,11 @@ def create_message(db_refresh_count):
 		if (text, chat, update_id, greeting, language) != last_textchat: # If there is a new message
 			
 			coin_name = text.upper()
-			cur.execute("SELECT Price, Exchange, Change FROM Prices WHERE Coin = ?", (coin_name, ))
+			
+			cur.execute('SELECT id FROM Coin WHERE name = ?', (coin_name, ))
+			current_id = cur.fetchone()[0]
+			cur.execute("SELECT Price, exchange_id, Change FROM Price WHERE coin_id = ?", (current_id, ))
+			
 			rows = cur.fetchall()
 			
 			message = greeting
@@ -127,7 +150,9 @@ def create_message(db_refresh_count):
 			else:
 				message += coin_name + " (" + symbol_dict.get(coin_name, "") + ")" + translate(" Fiyati: ", language) + "\n"
 				for r in rows:
-					message += str(r[0]) + " " + str(r[1]) + translate(" Degisim(24 saat): %", language) + str(r[2]) + "\n"
+					cur.execute("SELECT name FROM Exchange WHERE id = ?", (r[1], ))
+					exchange_name = cur.fetchone()[0]
+					message += str(r[0]) + " " + exchange_name + translate(" Degisim(24 saat): %", language) + str(r[2]) + "\n"
 			
 			send_message(message, chat)
 			last_textchat = (text, chat, update_id, greeting, language)
@@ -136,7 +161,7 @@ def create_message(db_refresh_count):
 		db_refresh_count = db_refresh_count + 1
 
 def parse_coin_data(api_url):
-	# Get exchange data and store in db
+	# Get exchange data and store in DB
 	
 	now = datetime.datetime.now()
 	try:
@@ -148,9 +173,17 @@ def parse_coin_data(api_url):
 
 	if "paribu" in api_url:
 		for object in info:
-			cur.execute('''INSERT INTO Prices (Time, Coin, Exchange, Price, Change)
-					VALUES (?, ?, ?, ?, ?)''',
-						(now.strftime('%H:%M:%S'), object[:-3], "Paribu", info[object]["last"], info[object]["percentChange"]))
+						
+			cur.execute('INSERT OR IGNORE INTO Coin (name) VALUES (?)', (object[:-3], ))
+			cur.execute('SELECT id FROM Coin WHERE name = ? ', (object[:-3], ))
+			coin_id = cur.fetchone()[0]
+			
+			cur.execute('INSERT OR IGNORE INTO Exchange (name) VALUES (?)', ("Paribu", ))
+			cur.execute('SELECT id FROM Exchange WHERE name = ? ', ("Paribu", ))
+			exchange_id = cur.fetchone()[0]
+			
+			cur.execute('''INSERT OR REPLACE INTO Price (Time, coin_id, exchange_id, Price, Change) 
+				VALUES (?, ?, ?, ?, ?)''', (now.strftime('%H:%M:%S'), coin_id, exchange_id, info[object]["last"], info[object]["percentChange"], ))
 		conn.commit()
 	
 	elif "btcturk" in api_url:
@@ -159,16 +192,34 @@ def parse_coin_data(api_url):
 				currency = object["pair"][:-3]
 			elif object["pair"][-1] == "T": # USDT
 				currency = object["pair"][:-4]
-			cur.execute('''INSERT INTO Prices (Time, Coin, Exchange, Price, Change)
-						VALUES (?, ?, ?, ?, ?)''',
-						(now.strftime('%H:%M:%S'), currency, "BTCTurk", object["last"], object["dailyPercent"]))
+						
+			cur.execute('INSERT OR IGNORE INTO Coin (name) VALUES (?)', (currency, ))
+			cur.execute('SELECT id FROM Coin WHERE name = ? ', (currency, ))
+			coin_id = cur.fetchone()[0]
+			
+			cur.execute('INSERT OR IGNORE INTO Exchange (name) VALUES (?)', ("BTCTurk", ))
+			cur.execute('SELECT id FROM Exchange WHERE name = ? ', ("BTCTurk", ))
+			exchange_id = cur.fetchone()[0]
+			
+			cur.execute('''INSERT OR REPLACE INTO Price (Time, coin_id, exchange_id, Price, Change) 
+				VALUES (?, ?, ?, ?, ?)''', (now.strftime('%H:%M:%S'), coin_id, exchange_id, object["last"], object["dailyPercent"], ))
+						
 		conn.commit()
 	
 	elif "koineks" in api_url:
 		for object in info:
-			cur.execute('''INSERT INTO Prices (Time, Coin, Exchange, Price, Change)
-							VALUES (?, ?, ?, ?, ?)''',
-						(now.strftime('%H:%M:%S'), object, "Koineks", info[object]["current"], info[object]["change_percentage"]))
+						
+			cur.execute('INSERT OR IGNORE INTO Coin (name) VALUES (?)', (object, ))
+			cur.execute('SELECT id FROM Coin WHERE name = ? ', (object, ))
+			coin_id = cur.fetchone()[0]
+			
+			cur.execute('INSERT OR IGNORE INTO Exchange (name) VALUES (?)', ("Koineks", ))
+			cur.execute('SELECT id FROM Exchange WHERE name = ? ', ("Koineks", ))
+			exchange_id = cur.fetchone()[0]
+			
+			cur.execute('''INSERT OR REPLACE INTO Price (Time, coin_id, exchange_id, Price, Change) 
+			VALUES (?, ?, ?, ?, ?)''', (now.strftime('%H:%M:%S'), coin_id, exchange_id, info[object]["current"], info[object]["change_percentage"], ))
+						
 		conn.commit()
 	
 	elif "koinim" in api_url:
@@ -180,9 +231,18 @@ def parse_coin_data(api_url):
 				koinim_info = json.loads(webpage_ticker)
 			except:
 				return -1
-			cur.execute('''INSERT INTO Prices (Time, Coin, Exchange, Price, Change)
-								VALUES (?, ?, ?, ?, ?)''',
-						(now.strftime('%H:%M:%S'), object[:-4], "Koinim", koinim_info["last_order"], koinim_info["change_rate"]))
+						
+			cur.execute('INSERT OR IGNORE INTO Coin (name) VALUES (?)', (object[:-4], ))
+			cur.execute('SELECT id FROM Coin WHERE name = ? ', (object[:-4], ))
+			coin_id = cur.fetchone()[0]
+			
+			cur.execute('INSERT OR IGNORE INTO Exchange (name) VALUES (?)', ("Koinim", ))
+			cur.execute('SELECT id FROM Exchange WHERE name = ? ', ("Koinim", ))
+			exchange_id = cur.fetchone()[0]
+			
+			cur.execute('''INSERT OR REPLACE INTO Price (Time, coin_id, exchange_id, Price, Change) 
+				VALUES (?, ?, ?, ?, ?)''', (now.strftime('%H:%M:%S'), coin_id, exchange_id, koinim_info["last_order"], koinim_info["change_rate"], ))
+						
 		conn.commit()
 
 create_message(db_refresh_count)
