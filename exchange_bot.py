@@ -145,22 +145,27 @@ def create_message(db_refresh_count):
 		if (text, chat, update_id, greeting, language) != last_textchat: # If there is a new message
 			
 			coin_name = text.upper()
+			message = greeting
 			
 			cur.execute('SELECT id FROM Coin WHERE name = ?', (coin_name, ))
-			current_id = cur.fetchone()[0]
-			cur.execute("SELECT Price, exchange_id, Change FROM Price WHERE coin_id = ?", (current_id, ))
+			current_id = cur.fetchone()
 			
-			rows = cur.fetchall()
-			
-			message = greeting
-			if len(rows) < 1 :
+			if current_id is None:
 				message += translate("Gecersiz kisaltma girdiniz", language)
+				
 			else:
-				message += coin_name + " (" + symbol_dict.get(coin_name, "") + ")" + translate(" Fiyati: ", language) + "\n"
-				for r in rows:
-					cur.execute("SELECT name FROM Exchange WHERE id = ?", (r[1], ))
-					exchange_name = cur.fetchone()[0]
-					message += str(r[0]) + " " + exchange_name + translate(" Degisim(24 saat): %", language) + str(r[2]) + "\n"
+			
+				cur.execute("SELECT Price, exchange_id, Change FROM Price WHERE coin_id = ?", (current_id[0], ))				
+				rows = cur.fetchall()
+				
+				if len(rows) < 1 :
+					message += translate("Gecersiz kisaltma girdiniz", language)
+				else:
+					message += coin_name + " (" + symbol_dict.get(coin_name, "") + ")" + translate(" Fiyati: ", language) + "\n"
+					for r in rows:
+						cur.execute("SELECT name FROM Exchange WHERE id = ?", (r[1], ))
+						exchange_name = cur.fetchone()[0]
+						message += str(r[0]) + " " + exchange_name + translate(" Degisim(24 saat): %", language) + str(r[2]) + "\n"
 			
 			send_message(message, chat)
 			last_textchat = (text, chat, update_id, greeting, language)
