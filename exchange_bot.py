@@ -29,7 +29,7 @@ def create_db():
 	
 	CREATE TABLE Coin (
 		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-		name TEXT
+		name TEXT UNIQUE
 	);
 	
 	CREATE TABLE Exchange (
