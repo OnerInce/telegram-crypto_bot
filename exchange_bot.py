@@ -131,7 +131,15 @@ def create_message(db_refresh_count):
 					send_message(translate("Bir hata olustu", language), chat)
 					continue
 			
-			print(pd.read_sql_query("SELECT * FROM Prices", conn)) # Print db to screen
+			# Print db contents to screen
+			
+			print(pd.read_sql_query('''
+			
+			SELECT Price.Time, Coin.name, Exchange.name, Price.Price, Price.Change
+			FROM Coin JOIN Exchange JOIN Price 
+			ON Price.coin_id = Coin.id AND Price.exchange_id = Exchange.id
+			
+			''', conn))
 			
 		
 		if (text, chat, update_id, greeting, language) != last_textchat: # If there is a new message
