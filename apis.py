@@ -2,7 +2,7 @@
 
 
 List of the exchanges' API links
-To add a new exhange, simply add API link here and update coin_bot.py's parse_coin_data method accordingly
+To add a new exhange, simply add API link here and update exchange_bot.py's parse_coin_data method accordingly
 
 
 """
