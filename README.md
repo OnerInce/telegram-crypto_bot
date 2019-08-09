@@ -20,6 +20,7 @@ The goal of this Telegram bot is to give the user current price of the cryptocur
 + [Demo / Working](#demo)
 + [How it works](#working)
 + [Usage](#usage)
++ [Test](#test)
 + [Future Goals](#goals)
 + [Authors](#authors)
 + [Acknowledgments](#acknowledgement)
@@ -36,6 +37,10 @@ The bot first starts to fill the database. Content of the database updates in 90
 To use the bot:
 
 Enter the coin symbol without slash or something i.e. "eth" (without quotes, case doesn't matter). And bot replies you with information. Because of some coins are not present in all exchanges, only the exchanges that has specific coin shows up in bot's reply. 
+
+## :video_game: Test <a name = "test"></a>
+
+To test and use this bot on Telegram, please see bot.py. All suggestions are welcome. 
 
 ### Prerequisites
 
