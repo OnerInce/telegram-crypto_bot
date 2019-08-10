@@ -84,7 +84,7 @@ def get_last_chat_id_and_text(updates):
 	except:
 		language = "tr"
 	
-	greeting = translate("Merhaba ", language) + name.capitalize() + "\n"
+	greeting = translate("Hello ", language) + name.capitalize() + "\n"
 		
 	# if user enters a non-text -invalid- message
 	
@@ -113,7 +113,7 @@ def create_message(db_refresh_count):
 		# if user had entered an invalid message
 		
 		if text == -1 and (text, chat, update_id, greeting, language) != last_textchat: 
-			send_message(translate("Gecersiz kisaltma girdiniz", language), chat)
+			send_message(translate("You have entered an invalid symbol", language), chat)
 			last_textchat = (-1, chat, update_id, greeting, language)
 			continue
 
@@ -128,7 +128,7 @@ def create_message(db_refresh_count):
 			for url in api_url_list:
 				http_check = parse_coin_data(url)
 				if http_check == -1:
-					send_message(translate("Bir hata olustu", language), chat)
+					send_message(translate("An error has occurred", language), chat)
 					continue
 			
 			# Print db contents to screen
@@ -151,7 +151,7 @@ def create_message(db_refresh_count):
 			current_id = cur.fetchone()
 			
 			if current_id is None:
-				message += translate("Gecersiz kisaltma girdiniz", language)
+				message += translate("You have entered an invalid symbol", language)
 				
 			else:
 			
@@ -159,18 +159,19 @@ def create_message(db_refresh_count):
 				rows = cur.fetchall()
 				
 				if len(rows) < 1 :
-					message += translate("Gecersiz kisaltma girdiniz", language)
-				else:
-					message += coin_name + " (" + symbol_dict.get(coin_name, "") + ")" + translate(" Fiyati: ", language) + "\n"
-					for r in rows:
+					message += translate("You have entered an invalid symbol", language)
+				else: 
+					message += coin_name + " (" + symbol_dict.get(coin_name, "") + ")" + translate(" Price: ", language) + "\n"
+					
+					for r in rows: # get each exchange's data
 						cur.execute("SELECT name FROM Exchange WHERE id = ?", (r[1], ))
 						exchange_name = cur.fetchone()[0]
-						message += str(r[0]) + " " + exchange_name + translate(" Degisim(24 saat): %", language) + str(r[2]) + "\n"
+						message += str(r[0]) + " " + exchange_name + translate(" Change(24 hrs): %", language) + str(r[2]) + "\n"
 			
 			send_message(message, chat)
 			last_textchat = (text, chat, update_id, greeting, language)
 		
-		time.sleep(2)
+		time.sleep(2)  # give telegram servers some rest
 		db_refresh_count = db_refresh_count + 1
 
 def parse_coin_data(api_url):
@@ -203,8 +204,8 @@ def parse_coin_data(api_url):
 		for object in info:
 			if object["pair"][-1] == "Y": # TRY
 				currency = object["pair"][:-3]
-			elif object["pair"][-1] == "T": # USDT
-				currency = object["pair"][:-4]
+			elif object["pair"][-1] == "T": # don't take USDT pairs, only TRY
+				continue
 						
 			cur.execute('INSERT OR IGNORE INTO Coin (name) VALUES (?)', (currency, ))
 			cur.execute('SELECT id FROM Coin WHERE name = ? ', (currency, ))
