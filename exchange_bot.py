@@ -1,262 +1,229 @@
-from urllib.request import Request, urlopen
-from cmc_data import symbol_dict
-from translate import translate
-from apis import api_url_list
-from bot import TOKEN
-import json
-import sqlite3
+"""
+First, a few handler functions are defined. Then, those functions are passed to
+the Dispatcher and registered at their respective places.
+
+Usage:
+Press Ctrl-C on the command line or send a signal to the process to stop the bot.
+"""
 import datetime
-import pandas as pd
-import requests
-import time
-				
-conn = sqlite3.connect('coindb.sqlite')
-cur = conn.cursor()
+import logging
+import sqlite3
+from urllib.request import Request, urlopen
+from translate import translate
+import json
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from cmc_data import symbol_dict
+import decimal
+from settings import constants
+import pytz
 
-db_refresh_count = 0
 
-if len(TOKEN) != 45:
-	exit()
+TIME_BETWEEN_REQUESTS = 30  # seconds
+LAST_FETCH_TIME = datetime.datetime.min
 
-URL = "https://api.telegram.org/bot{}/".format(TOKEN)
+# Enable logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.DEBUG)
+
+logger = logging.getLogger(__name__)
+
 
 def create_db():
-	
-	cur.executescript('''
-	DROP TABLE IF EXISTS Coin;
-	DROP TABLE IF EXISTS Exchange;
-	DROP TABLE IF EXISTS Price;
-	
-	CREATE TABLE Coin (
-		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-		name TEXT UNIQUE
-	);
-	
-	CREATE TABLE Exchange (
-		id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-		name TEXT UNIQUE 
-	);
-	
-	CREATE TABLE Price (
-		Time DATE,
-		coin_id INTEGER, 
-		exchange_id INTEGER, 
-		Price INTEGER, 
-		Change FLOAT,
-		PRIMARY KEY (coin_id, exchange_id)
-	)''')
+    conn = sqlite3.connect(constants["DB_FILE_NAME"])
+    cur = conn.cursor()
+
+    cur.executescript('''
+    DROP TABLE IF EXISTS Pair;
+    DROP TABLE IF EXISTS Exchange;
+    DROP TABLE IF EXISTS Price;
+
+    CREATE TABLE Pair (
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+        first TEXT,
+        second TEXT
+    );
+
+    CREATE TABLE Exchange (
+        id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+        name TEXT UNIQUE 
+    );
+
+    CREATE TABLE Price (
+        Time DATE,
+        pair_id INTEGER, 
+        exchange_id INTEGER, 
+        Price INTEGER, 
+        Change FLOAT,
+        PRIMARY KEY (pair_id, exchange_id)
+    )''')
+
+    conn.close()
 
 
-def get_json_from_url(url):
-	# Return parsed json content of the url
-	
-	response = requests.get(url)
-	content = response.content.decode("utf8")
-	js = json.loads(content)
-    
-	return js
+def create_message(coin_input, lang, time):
+    conn_f = sqlite3.connect(constants["DB_FILE_NAME"])
+    cur_f = conn_f.cursor()
+
+    now = datetime.datetime.now().replace(microsecond=0)
+    print(type(now))
+    global LAST_FETCH_TIME
+    print("NOW:", now)
+    print("LAST_FETCH: ", LAST_FETCH_TIME)
+    elapsed_time = (now - LAST_FETCH_TIME).total_seconds()
+    print("Time Elapsed since last request: ", elapsed_time)
+
+    if elapsed_time > TIME_BETWEEN_REQUESTS:
+        for url in constants["API_URLS"]:
+            http_check = parse_coin_data(url, time)
+            if http_check == -1:
+                print("An error has occurred")
+                continue
+
+    message = translate("Price Time: ", lang) + LAST_FETCH_TIME.strftime("%m/%d/%Y, %H:%M:%S") + " GMT\n"
+    coin_name = coin_input.upper()
+
+    cur_f.execute("""SELECT first, second, Price, exchange_id, Change FROM Price 
+                    JOIN Pair ON Price.pair_id = Pair.id WHERE first = ?""", (coin_name,))
+    rows = cur_f.fetchall()
+
+    if len(rows) < 1:
+        message += translate("You have entered an invalid symbol", lang)
+    else:
+        message += coin_name + " (" + symbol_dict.get(coin_name, "") + ")" + translate(" Price: ",
+                                                                                       lang) + "\n"
+        for r in rows:  # get each exchange's and pair's data
+            cur_f.execute("SELECT name FROM Exchange WHERE id = ?", (r[3],))
+            exchange_name = cur_f.fetchone()[0]
+            decimal.getcontext().prec = 3
+            price_fixed_float = str(decimal.getcontext().create_decimal(r[2]))
+            if "e" not in str(r[2]):  # if not scientific notation
+                price_fixed_float = str(float(price_fixed_float))
+            message += exchange_name + " (" + str(r[1]) + ")" + "---> " + price_fixed_float + \
+                       translate(" Change: %", lang) + str(r[4]) + "\n"
+    conn_f.close()
+
+    return message
 
 
-def get_updates(update_id):
-	# Return json content of the latest update's link
-	
-	if not update_id is None:
-		url = URL + "getUpdates?offset=" + str(update_id)
-	else:
-		url = URL + "getUpdates"
-	js = get_json_from_url(url)
-	
-	return js
+def parse_coin_data(api_url, request_time):
+    # Get exchange data and store in DB
+
+    conn_g = sqlite3.connect(constants["DB_FILE_NAME"])
+    cur_g = conn_g.cursor()
+
+    now = datetime.datetime.now()
+    global LAST_FETCH_TIME
+    LAST_FETCH_TIME = request_time
+    print("Parse coin Data Last Request: ", now)
+
+    try:
+        req = Request(api_url, headers={'User-Agent': 'Mozilla/5.0'})
+        webpage = urlopen(req).read().decode()
+        info = json.loads(webpage)
+    except:
+        return -1
+
+    if "paribu" in api_url:
+        for object in info:
+
+            pair_name_split = object.split("_")
+            first_name, second_name = pair_name_split[0], pair_name_split[1]
+
+            if second_name == "TL":
+                second_name = "TRY"
+
+            cur_g.execute('INSERT OR IGNORE INTO Pair (first, second) VALUES (?, ?)', (first_name, second_name,))
+            cur_g.execute('SELECT id FROM Pair WHERE first = ? AND second = ?', (first_name, second_name,))
+            pair_id = cur_g.fetchone()[0]
+
+            cur_g.execute('INSERT OR IGNORE INTO Exchange (name) VALUES (?)', ("Paribu",))
+            cur_g.execute('SELECT id FROM Exchange WHERE name = ? ', ("Paribu",))
+            exchange_id = cur_g.fetchone()[0]
+
+            cur_g.execute('''INSERT OR REPLACE INTO Price (Time, pair_id, exchange_id, Price, Change) 
+                VALUES (?, ?, ?, ?, ?)''', (
+                now.strftime('%H:%M:%S'), pair_id, exchange_id, info[object]["last"], info[object]["percentChange"],))
+        conn_g.commit()
+
+    elif "btcturk" in api_url:
+        for object in info["data"]:
+            first_name = object["numeratorSymbol"]
+            second_name = object["denominatorSymbol"]
+            price = object["last"]
+            change = object["dailyPercent"]
+
+            cur_g.execute('INSERT OR IGNORE INTO Pair (first, second) VALUES (?, ?)', (first_name, second_name,))
+            cur_g.execute('SELECT id FROM Pair WHERE first = ? AND second = ?', (first_name, second_name,))
+            pair_id = cur_g.fetchone()[0]
+
+            cur_g.execute('INSERT OR IGNORE INTO Exchange (name) VALUES (?)', ("BTCTurk",))
+            cur_g.execute('SELECT id FROM Exchange WHERE name = ? ', ("BTCTurk",))
+            exchange_id = cur_g.fetchone()[0]
+
+            cur_g.execute('''INSERT OR REPLACE INTO Price (Time, pair_id, exchange_id, Price, Change) 
+                VALUES (?, ?, ?, ?, ?)''',
+                          (now.strftime('%H:%M:%S'), pair_id, exchange_id, price, change,))
+
+        conn_g.commit()
 
 
-def get_last_chat_id_and_text(updates):
-	# Get last message sender's information
-	
-	num_updates = len(updates["result"])
-	last_update = num_updates - 1
-	chat_id = updates["result"][last_update]["message"]["chat"]["id"]
-	name = updates["result"][last_update]["message"]["chat"]["first_name"]
-	last_update_id = updates["result"][last_update]["update_id"]
-	
-	# In case of a language_code error
-	try:
-		language = updates["result"][last_update]["message"]["from"]["language_code"]
-	except:
-		language = "tr"
-	
-	greeting = translate("Hello ", language) + name.capitalize() + "\n"
-		
-	# if user enters a non-text -invalid- message
-	
-	try:
-		text = updates["result"][last_update]["message"]["text"]
-	except:
-		return (-1, chat_id, last_update_id, greeting, language)
-
-		
-	return (text, chat_id, last_update_id, greeting, language)
+# Define a few command handlers. These usually take the two arguments update and
+# context. Error handlers also receive the raised TelegramError object in error.
 
 
-def send_message(text, chat_ID):
-	url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_ID)
-	requests.get(url)
+def start(update, context):
+    """Send a message when the command /start is issued."""
+    start_lang = update["message"].from_user["language_code"]
+    start_text = translate('Hi! Welcome to Bot. You can use /help', start_lang)
+
+    update.message.reply_text(start_text)
 
 
-def create_message(db_refresh_count):
-	last_textchat = (None, None, None, None, None)
-	update_id = None
-	
-	while True:
+def help(update, context):
+    """Send a message when the command /help is issued."""
+    help_lang = update["message"].from_user["language_code"]
+    help_text = translate('Simply just type a coin name such as BTC, ETH, DOT. Bot is case-insensitive', help_lang)
 
-		text, chat, update_id, greeting, language = get_last_chat_id_and_text(get_updates(update_id))
+    update.message.reply_text(help_text)
 
-		# if user had entered an invalid message
-		
-		if text == -1 and (text, chat, update_id, greeting, language) != last_textchat: 
-			send_message(translate("You have entered an invalid symbol", language), chat)
-			last_textchat = (-1, chat, update_id, greeting, language)
-			continue
 
-		
-		if db_refresh_count == 30: # Update db in every 60 seconds
-			db_refresh_count = 0
-			continue
-		
-		elif db_refresh_count == 0:
-			create_db()
-			
-			for url in api_url_list:
-				http_check = parse_coin_data(url)
-				if http_check == -1:
-					send_message(translate("An error has occurred", language), chat)
-					continue
-			
-			# Print db contents to screen
-			
-			print(pd.read_sql_query('''
-			
-			SELECT Price.Time, Coin.name, Exchange.name, Price.Price, Price.Change
-			FROM Coin JOIN Exchange JOIN Price 
-			ON Price.coin_id = Coin.id AND Price.exchange_id = Exchange.id
-			
-			''', conn))
-			
-		
-		if (text, chat, update_id, greeting, language) != last_textchat: # If there is a new message
-			
-			coin_name = text.upper()
-			message = greeting
-			
-			cur.execute('SELECT id FROM Coin WHERE name = ?', (coin_name, ))
-			current_id = cur.fetchone()
-			
-			if current_id is None:
-				message += translate("You have entered an invalid symbol", language)
-				
-			else:
-			
-				cur.execute("SELECT Price, exchange_id, Change FROM Price WHERE coin_id = ?", (current_id[0], ))				
-				rows = cur.fetchall()
-				
-				if len(rows) < 1 :
-					message += translate("You have entered an invalid symbol", language)
-				else: 
-					message += coin_name + " (" + symbol_dict.get(coin_name, "") + ")" + translate(" Price: ", language) + "\n"
-					
-					for r in rows: # get each exchange's data
-						cur.execute("SELECT name FROM Exchange WHERE id = ?", (r[1], ))
-						exchange_name = cur.fetchone()[0]
-						message += str(r[0]) + " " + exchange_name + translate(" Change(24 hrs): %", language) + str(r[2]) + "\n"
-			
-			send_message(message, chat)
-			last_textchat = (text, chat, update_id, greeting, language)
-		
-		time.sleep(2)  # give telegram servers some rest
-		db_refresh_count = db_refresh_count + 1
+def echo(update, context):
+    """Echo the coin prices to user."""
+    message_lang = update["message"].from_user["language_code"]
+    message_time = update["message"]["date"]
+    message_time = message_time.replace(tzinfo=None)
+    print("MESSAGE TIME: ", message_time)
 
-def parse_coin_data(api_url):
-	# Get exchange data and store in DB
-	
-	now = datetime.datetime.now()
-	try:
-		req = Request(api_url, headers={'User-Agent': 'Mozilla/5.0'})
-		webpage = urlopen(req).read().decode()
-		info = json.loads(webpage)
-	except:
-		return -1
+    reply = create_message(update.message.text, message_lang, message_time)
+    update.message.reply_text(reply)
 
-	if "paribu" in api_url:
-		for object in info:
-						
-			cur.execute('INSERT OR IGNORE INTO Coin (name) VALUES (?)', (object[:-3], ))
-			cur.execute('SELECT id FROM Coin WHERE name = ? ', (object[:-3], ))
-			coin_id = cur.fetchone()[0]
-			
-			cur.execute('INSERT OR IGNORE INTO Exchange (name) VALUES (?)', ("Paribu", ))
-			cur.execute('SELECT id FROM Exchange WHERE name = ? ', ("Paribu", ))
-			exchange_id = cur.fetchone()[0]
-			
-			cur.execute('''INSERT OR REPLACE INTO Price (Time, coin_id, exchange_id, Price, Change) 
-				VALUES (?, ?, ?, ?, ?)''', (now.strftime('%H:%M:%S'), coin_id, exchange_id, info[object]["last"], info[object]["percentChange"], ))
-		conn.commit()
-	
-	elif "btcturk" in api_url:
-		for object in info:
-			if object["pair"][-1] == "Y": # TRY
-				currency = object["pair"][:-3]
-			elif object["pair"][-1] == "T": # don't take USDT pairs, only TRY
-				continue
-						
-			cur.execute('INSERT OR IGNORE INTO Coin (name) VALUES (?)', (currency, ))
-			cur.execute('SELECT id FROM Coin WHERE name = ? ', (currency, ))
-			coin_id = cur.fetchone()[0]
-			
-			cur.execute('INSERT OR IGNORE INTO Exchange (name) VALUES (?)', ("BTCTurk", ))
-			cur.execute('SELECT id FROM Exchange WHERE name = ? ', ("BTCTurk", ))
-			exchange_id = cur.fetchone()[0]
-			
-			cur.execute('''INSERT OR REPLACE INTO Price (Time, coin_id, exchange_id, Price, Change) 
-				VALUES (?, ?, ?, ?, ?)''', (now.strftime('%H:%M:%S'), coin_id, exchange_id, object["last"], object["dailyPercent"], ))
-						
-		conn.commit()
-	
-	elif "koineks" in api_url:
-		for object in info:
-						
-			cur.execute('INSERT OR IGNORE INTO Coin (name) VALUES (?)', (object, ))
-			cur.execute('SELECT id FROM Coin WHERE name = ? ', (object, ))
-			coin_id = cur.fetchone()[0]
-			
-			cur.execute('INSERT OR IGNORE INTO Exchange (name) VALUES (?)', ("Koineks", ))
-			cur.execute('SELECT id FROM Exchange WHERE name = ? ', ("Koineks", ))
-			exchange_id = cur.fetchone()[0]
-			
-			cur.execute('''INSERT OR REPLACE INTO Price (Time, coin_id, exchange_id, Price, Change) 
-			VALUES (?, ?, ?, ?, ?)''', (now.strftime('%H:%M:%S'), coin_id, exchange_id, info[object]["current"], info[object]["change_percentage"], ))
-						
-		conn.commit()
-	
-	elif "koinim" in api_url:
-		for object in info:
-			comp_link = "https://koinim.com/api/v1/ticker/" + object
-			try:
-				ticker_req = Request(comp_link, headers={'User-Agent': 'Mozilla/5.0'})
-				webpage_ticker = urlopen(ticker_req).read().decode()
-				koinim_info = json.loads(webpage_ticker)
-			except:
-				return -1
-						
-			cur.execute('INSERT OR IGNORE INTO Coin (name) VALUES (?)', (object[:-4], ))
-			cur.execute('SELECT id FROM Coin WHERE name = ? ', (object[:-4], ))
-			coin_id = cur.fetchone()[0]
-			
-			cur.execute('INSERT OR IGNORE INTO Exchange (name) VALUES (?)', ("Koinim", ))
-			cur.execute('SELECT id FROM Exchange WHERE name = ? ', ("Koinim", ))
-			exchange_id = cur.fetchone()[0]
-			
-			cur.execute('''INSERT OR REPLACE INTO Price (Time, coin_id, exchange_id, Price, Change) 
-				VALUES (?, ?, ?, ?, ?)''', (now.strftime('%H:%M:%S'), coin_id, exchange_id, koinim_info["last_order"], koinim_info["change_rate"], ))
-						
-		conn.commit()
 
-create_message(db_refresh_count)
+def error(update, context):
+    logger.warning('Update "%s" caused error "%s"', update, context.error)
+
+
+def start_bot():
+    """Start the bot."""
+    # Create the Updater and pass it your bot's token.
+    updater = Updater(constants["BOT_TOKEN"])
+
+    dp = updater.dispatcher
+
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("help", help))
+
+    # on noncommand - fetch coin price
+    dp.add_handler(MessageHandler(Filters.text, echo))
+
+    # log all errors
+    dp.add_error_handler(error)
+
+    # Start the Bot
+    updater.start_polling()
+
+    updater.idle()
+
+
+if __name__ == '__main__':
+    create_db()
+    start_bot()
