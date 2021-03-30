@@ -43,7 +43,7 @@ def style_message(lang_code, coin, all_prices):
     day = LAST_FETCH_TIME.strftime("%m/%d/%Y")
     time = LAST_FETCH_TIME.strftime("%H:%M:%S")
 
-    message = day + ", " + make_bold(time) + " GMT\n"
+    message = day + ", " + make_bold(time + " GMT") + "\n"
     message += coin + " (" + symbol_dict.get(coin, "") + ")" + translate(" Price: ", lang_code) + "\n"
 
     for i in range(0, len(all_prices), 4):
@@ -57,8 +57,13 @@ def style_message(lang_code, coin, all_prices):
         else:
             change_sym = "+"
 
-        message += make_pre(exchange) + " > " + make_bold(price) + " " + make_italic(parity) + "    " + change_sym + "%" + change + "\n"
+        if exchange == 'Paribu':
+            message += make_pre(exchange) + 3 * " " + "> "
+        else:
+            message += make_pre(exchange) + " " + "> "
 
+        message += make_bold(price) + " " + make_italic(parity) + " " * 5
+        message += change_sym + "%" + change + "\n"
     return message
 
 
