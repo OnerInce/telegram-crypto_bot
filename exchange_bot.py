@@ -52,8 +52,9 @@ def style_message(lang_code, coin, all_prices):
         price = all_prices[i + 2]
         change = all_prices[i + 3]
 
-        if change[1] == "-":
+        if change[0] == "-":
             change_sym = "-"
+            change = change[1:]
         else:
             change_sym = "+"
 
