@@ -1,9 +1,5 @@
 """
-
-
 Translate Turkish bot messages to English according to user's language code
-
-
 """
 
 
