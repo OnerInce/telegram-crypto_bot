@@ -41,6 +41,19 @@ makes a query to the database and returns the corresponding data to user.
 
 ## 🎈 Usage <a name = "usage"></a>
 
+There are two ways to use this bot :
+
+**1. Docker Compose** :whale:
+
+Assuming Docker is already installed, run this command from proejct root directory:
+
+```
+docker compose up
+```
+A docker image will be built using Dockerfile and a container will start using docker-compose.yml. All requirements will install and bot will start.
+
+**2. Python Virtual Environment**
+
 Create a Python virtual environment and activate it:
 
 ```
@@ -63,7 +76,8 @@ To test and use this bot on Telegram, please see settings.py. Bot is active on *
 
 ### Prerequisites
 
-To use this bot, you'll need a proper Telegram bot Token, and a CoinMarketCap API key to retrieve data from CMC.
+To use this bot, you'll need a Telegram bot Token, and a CoinMarketCap API key to retrieve data from CMC.
+These information should be in a .env file on project root directory.
 
 * [CoinMarketCap API](https://pro.coinmarketcap.com/signup/)
 * [Telegram Bot Token](https://core.telegram.org/bots#creating-a-new-bot)
