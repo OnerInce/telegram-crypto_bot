@@ -3,3 +3,5 @@ services:
   app:
     build: .
     restart: on-failure
+    volumes: 
+      - .:/app
