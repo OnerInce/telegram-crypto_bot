@@ -20,6 +20,8 @@ After getting data from exchanges' API, SQLite used for data storing purposes.
 Database is updated in every 30 seconds to avoid a rate-limit from exchanges. 
 **Prices are given as Turkish Lira (TRY), Tether (USDT) and BTC pair (BTC)**
 
+**Medium article:** https://onerince.medium.com/aws-lambda-for-telegram-bots-d02517e1e2f2
+
 ## 📝 Table of Contents
 + [Demo / Working](#demo)
 + [How it works](#working)
@@ -38,6 +40,8 @@ The bot first starts to fill the database. Content of the database updates in 30
 API data if there is a new request from a Telegram user. Then, bot constantly checks for a new message from the user. 
 If there is a new message, bot reads the command from the user and if it is a valid coin symbol, 
 makes a query to the database and returns the corresponding data to user.
+
+**To deploy bot to AWS Lambda, use lambda.zip file. Deployment details on Medium article.**
 
 ## 🎈 Usage <a name = "usage"></a>
 
