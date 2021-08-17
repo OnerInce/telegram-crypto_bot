@@ -96,6 +96,9 @@ These information should be in a .env file on project root directory.
   - Added USDT and BTC pairs
   - Re-organized response message
   - Changed database structure for faster response times
+- August 2021 
+  - Deployed to AWS Lambda 
+  - Instead of CMC, now getting coin names from exchange APIs (one less request)
 
 ## :dart: Future Goals <a name = "goals"></a>
 
