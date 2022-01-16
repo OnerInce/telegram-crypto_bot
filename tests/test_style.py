@@ -9,8 +9,9 @@ def test_message_style():
     time = test_time.strftime("%H:%M:%S")
 
     test_price = ['Paribu', 'USDT', '50000', 3.1]
-    styled_msg = style_message(lang_code='en', coin_sym='BTC', coin_name='Bitcoin', fetch_time=test_time,
-                               user='Oner', all_prices=test_price)
+    styled_msg = style_message(
+        lang_code='en', coin_sym='BTC', coin_name='Bitcoin', fetch_time=test_time, user='Oner', all_prices=test_price
+    )
     correct_msg = f"""
     {day}, <b>{time}GMT</b>
     Hello <i>Oner</i>

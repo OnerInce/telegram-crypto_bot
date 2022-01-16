@@ -33,7 +33,7 @@ def get_coin_name_mappings():
             coin_symbol = obj["symbol"]
             symbol_dict[coin_name] = coin_symbol
 
-    except (ConnectionError, Timeout, TooManyRedirects) as e:
+    except (ConnectionError, Timeout, TooManyRedirects):
         return {}
 
     # Reverse symbol_dict
