@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  python3.8
+
+  Sample SAM Template for telegram-crypto-bot
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Architectures:
+        - x86_64
+      Events:
+        CryptoBot:
+          Type: Api
+          Properties:
+            Path: /getPrice
+            Method: get
+
+Outputs:
+  CryptoBotApi:
+    Description: "API Gateway endpoint URL for Prod stage for CryptoBot function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getPrice/"
+  CryptoBotFunction:
+    Description: "Telegram Crypto Bot Lambda Function"
+    Value: !GetAtt CryptoBotFunction.Arn
+  CryptoBotFunctionIamRole:
+    Description: "Implicit IAM Role created for CryptoBot function"
+    Value: !GetAtt CryptoBotFunctionRole.Arn
