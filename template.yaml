@@ -3,18 +3,18 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   python3.8
 
-  Sample SAM Template for telegram-crypto-bot
+  SAM Template for telegram-crypto-bot
 
 Globals:
   Function:
     Timeout: 3
 
 Resources:
-  HelloWorldFunction:
+  CryptoBotFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
-      Handler: app.lambda_handler
+      Handler: handler.lambda_handler
       Runtime: python3.8
       Architectures:
         - x86_64
