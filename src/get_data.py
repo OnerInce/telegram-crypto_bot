@@ -1,4 +1,4 @@
-from utils import get_json_response
+import utils
 
 
 def get_coin_name_btcturk(coin_symbol):
@@ -8,7 +8,7 @@ def get_coin_name_btcturk(coin_symbol):
 
     btcturk_url = 'https://api.btcturk.com/api/v2/server/exchangeinfo'
 
-    info = get_json_response(btcturk_url)
+    info = utils.get_json_response(btcturk_url)
 
     all_coins = info['data']['currencies']
 
@@ -22,7 +22,7 @@ def get_coin_name_btcturk(coin_symbol):
 def get_coin_price(api_url, target_coin, is_coin_name_wanted):
     # Get exchange data from APIs
 
-    info = get_json_response(api_url)
+    info = utils.get_json_response(api_url)
 
     if "paribu" in api_url:
         coin_name = info["data"]["currencies"][target_coin.lower()]["name"]
