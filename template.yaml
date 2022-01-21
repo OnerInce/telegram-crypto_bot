@@ -23,7 +23,7 @@ Resources:
           Type: Api
           Properties:
             Path: /getPrice
-            Method: get
+            Method: post
 
 Outputs:
   CryptoBotApi:
