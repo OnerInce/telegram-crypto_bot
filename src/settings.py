@@ -13,4 +13,4 @@ load_dotenv()  # take environment variables from .env
 API_URLS = ['https://v3.paribu.com/app/initials', 'https://api.btcturk.com/api/v2/ticker']
 
 # CoinMarketCap API KEY
-CMC_API_KEY = os.environ['CMC_KEY']
+CMC_API_KEY = os.environ["CMC_KEY"]
