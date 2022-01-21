@@ -1,4 +1,4 @@
-from src.utils import get_json_response
+from utils import get_json_response
 
 
 def get_coin_name_btcturk(coin_symbol):
