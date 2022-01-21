@@ -30,4 +30,4 @@ def lambda_handler(event, context):
     reply = create_message(user_text, message_lang, name)
     send_message(reply, chat_id)
 
-    return {'statusCode': 200}
+    return {'statusCode': 200, 'body': reply}
