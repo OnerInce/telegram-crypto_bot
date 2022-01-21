@@ -1,11 +1,11 @@
 import datetime
 import decimal
+import os
 
 import requests
 
 from settings import API_URLS
 from get_data import get_coin_price
-from handler import BOT_URL
 from style_message import style_message
 from translate import translate
 
@@ -20,7 +20,9 @@ def get_json_response(request_url):
 
 
 def send_message(text, chat_id):
-    url = BOT_URL + "sendMessage?text={}&chat_id={}&parse_mode=html".format(text, chat_id)
+    bot_url = f"https://api.telegram.org/bot{os.environ['BOT_TOKEN']}/"
+
+    url = bot_url + "sendMessage?text={}&chat_id={}&parse_mode=html".format(text, chat_id)
     requests.get(url)
 
 
