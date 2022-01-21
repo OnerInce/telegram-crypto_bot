@@ -4,10 +4,10 @@ import decimal
 import requests
 
 from settings import API_URLS
-from src.get_data import get_coin_price
-from src.handler import BOT_URL
-from src.style_message import style_message
-from src.translate import translate
+from get_data import get_coin_price
+from handler import BOT_URL
+from style_message import style_message
+from translate import translate
 
 
 def get_json_response(request_url):

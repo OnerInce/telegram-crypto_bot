@@ -1,7 +1,7 @@
 import json
 import os
 
-from src.utils import create_message, send_message
+from utils import create_message, send_message
 
 BOT_URL = f"https://api.telegram.org/bot{os.environ['BOT_TOKEN']}/"
 

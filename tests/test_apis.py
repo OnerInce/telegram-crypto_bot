@@ -1,6 +1,6 @@
 import requests
 
-from settings import API_URLS
+from src.settings import API_URLS
 from src.cmc_data import get_coin_name_mappings
 
 
