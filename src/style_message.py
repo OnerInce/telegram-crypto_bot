@@ -1,4 +1,4 @@
-from translate import translate
+from .translate import translate
 
 
 def style_message(lang_code, coin_sym, coin_name, fetch_time, all_prices, user):

@@ -1,7 +1,10 @@
 import requests
+from dotenv import load_dotenv
 
 from src.settings import API_URLS
 from src.cmc_data import get_coin_name_mappings
+
+load_dotenv()
 
 
 def test_cmc_api():
