@@ -1,5 +1,5 @@
 {
-    "body": "{\"message\": \"hello world\"}",
+    "body": "{\n    \"update_id\": 503801115,\n    \"message\": {\n        \"message_id\": 24238,\n        \"from\": {\n            \"id\": 1715360499,\n            \"is_bot\": false,\n            \"first_name\": \"Test\",\n            \"username\": \"test_user\",\n            \"language_code\": \"tr\"\n        },\n        \"chat\": {\n            \"id\": -100119453056456457473,\n            \"title\": \"Test Chat\",\n            \"first_name\": \"Test\"\n        },\n        \"date\": 1642685106,\n        \"text\": \"btc\"\n    }\n}",
     "resource": "/{proxy+}",
     "path": "/path/to/resource",
     "httpMethod": "POST",
