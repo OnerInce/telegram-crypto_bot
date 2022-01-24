@@ -23,4 +23,4 @@ jobs:
       - name: SAM Validate
         run: sam validate
       - run: sam build --use-container
-      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --parameter-overrides ParameterKey=TelegramBotToken,ParameterValue=${{ secrets.BOT_TOKEN }} ParameterKey=CoinMarketCapAPIKey,ParameterValue=${{ secrets.CMC_KEY }}
