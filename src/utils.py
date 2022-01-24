@@ -4,8 +4,8 @@ import os
 
 import requests
 
-from settings import API_URLS
 from get_data import get_coin_price
+from settings import API_URLS
 from style_message import style_message
 from translate import translate
 

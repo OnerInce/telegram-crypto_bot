@@ -1,8 +1,8 @@
 import requests
 from dotenv import load_dotenv
 
-from src.settings import API_URLS
 from src.cmc_data import get_coin_name_mappings
+from src.settings import API_URLS
 
 load_dotenv()
 
