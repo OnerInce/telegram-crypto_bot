@@ -5,7 +5,6 @@ Description: >
 
   SAM Template for telegram-crypto-bot
 
-
 Parameters:
   TelegramBotToken:
     Type: String
@@ -16,18 +15,16 @@ Parameters:
     Description: >-
       CoinMarketCap API Key to map coin symbols to coin names
 
-
 Globals:
   Function:
     Timeout: 5
-
 
 Resources:
   CryptoBotFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
-      Handler: src.handler.lambda_handler
+      Handler: handler.lambda_handler
       Runtime: python3.8
       Environment:
         Variables:
