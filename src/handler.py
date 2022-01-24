@@ -6,9 +6,6 @@ from utils import create_message, send_message
 def lambda_handler(event, context):
     message = json.loads(event['body'])
 
-    # for testing
-    # message = event["result"][0]
-
     chat_id = message['message']['chat']['id']
     user_text = message['message']['text']
 
