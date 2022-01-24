@@ -27,7 +27,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
-      Handler: handler.lambda_handler
+      Handler: src.handler.lambda_handler
       Runtime: python3.8
       Environment:
         Variables:
