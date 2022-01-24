@@ -9,82 +9,30 @@
 
   ![Status](https://img.shields.io/badge/status-active-success.svg)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
+  ![example workflow](https://github.com/OnerInce/telegram-crypto_bot/actions/workflows/LintAndTest.yml/badge.svg)
+  ![example workflow](https://github.com/OnerInce/telegram-crypto_bot/actions/workflows/DevDeploy.yml/badge.svg)
 
 </div>
 
 ---
 
 The goal of this Telegram bot is to give the user current price of the cryptocurrencies from Turkish exchanges. 
-Bot currently supports 2 biggest Turkish exchanges : *Paribu and BTCTurk.* 
-After getting data from exchanges' API, SQLite used for data storing purposes. 
-Database is updated in every 30 seconds to avoid a rate-limit from exchanges. 
-**Prices are given as Turkish Lira (TRY), Tether (USDT) and BTC pair (BTC)**
+Bot currently supports 2 biggest Turkish exchanges : *Paribu and BTCTurk.*  
+**Prices are given as Turkish Lira (TRY), Tether (USDT) and BTC pairs (BTC)**
 
 **Medium article:** https://onerince.medium.com/aws-lambda-for-telegram-bots-d02517e1e2f2
 
 ## 📝 Table of Contents
 + [Demo / Working](#demo)
++ [What's New](#new)
 + [How it works](#working)
 + [Usage](#usage)
 + [Test](#test)
-+ [What's New](#new)
 + [Future Goals](#goals)
 + [Acknowledgments](#acknowledgement)
 
 ## 🎥 Demo / Working <a name = "demo"></a>
 <img align="center" src="/pics/demo.gif">
-
-## 💭 How it works <a name = "working"></a>
-
-The bot first starts to fill the database. Content of the database updates in 30 seconds according to exchanges' 
-API data if there is a new request from a Telegram user. Then, bot constantly checks for a new message from the user. 
-If there is a new message, bot reads the command from the user and if it is a valid coin symbol, 
-makes a query to the database and returns the corresponding data to user.
-
-**To deploy bot to AWS Lambda, use lambda.zip file. Deployment details on Medium article.**
-
-## 🎈 Usage <a name = "usage"></a>
-
-There are two ways to use this bot :
-
-**1. Docker Compose** :whale:
-
-Assuming Docker is already installed, run this command from proejct root directory:
-
-```
-docker compose up
-```
-A docker image will be built using Dockerfile and a container will start using docker-compose.yml. All requirements will install and bot will start.
-
-**2. Python Virtual Environment**
-
-Create a Python virtual environment and activate it:
-
-```
-pip3 install --upgrade virtualenv
-python3 -m venv env
-.\env\Scripts\activate
-```
-
-Install required packages:
-
-```
-pip install -r requirements.txt
-```
-
-Enter the coin symbol without slash or something i.e. "eth" (without quotes, case doesn't matter). And bot replies you with information. Because of some coins are not present in all exchanges, only the exchanges that has specific coin shows up in bot's reply. 
-
-## :video_game: Test <a name = "test"></a>
-
-To test and use this bot on Telegram, please see settings.py. Bot is active on **@python_koin_bot** on Telegram
-
-### Prerequisites
-
-To use this bot, you'll need a Telegram bot Token, and a CoinMarketCap API key to retrieve data from CMC.
-These information should be in a .env file on project root directory.
-
-* [CoinMarketCap API](https://pro.coinmarketcap.com/signup/)
-* [Telegram Bot Token](https://core.telegram.org/bots#creating-a-new-bot)
 
 ## :new: What's New <a name = "new"></a>
 
@@ -98,7 +46,88 @@ These information should be in a .env file on project root directory.
   - Changed database structure for faster response times
 - August 2021 
   - Deployed to AWS Lambda 
-  - Instead of CMC, now getting coin names from exchange APIs (one less request)
+  - Instead of CMC, now getting coin names from exchange APIs when possible (one less request)
+- January 2022 
+  - Now using AWS SAM to deploy Lambda, instead of manually uploading zip file :-)
+  - Created GitHub Actions Workflows to automatic deployment and tests
+
+## 💭 How it works <a name = "working"></a>
+
+Telegram has a webhook functionality for bots, so every time a message sent to a bot it is possible to process that
+request information to an external API service. I have used AWS Lambda and AWS API Gateway for this purpose.
+
+## 🎈 Usage <a name = "usage"></a>
+
+Verify template file:
+
+```
+sam validate
+```
+
+Build application:
+
+```
+sam build --use-container
+```
+
+Deploy function to your own AWS account or Telegram bot:
+
+```
+sam deploy --guided
+```
+
+## :video_game: Test <a name = "test"></a>
+
+Run Python unit tests
+
+```
+pytest
+```
+
+Invoke function locally using sample event (telegram bot message event)
+
+```
+sam local invoke CryptoBotFunction -e events/event.json
+```
+
+Instead of invoking function, you can also run it as an HTTP server. Port is 3000 as default. 
+
+```
+sam local start-api --env-vars env.json
+```
+
+You can control your code standards performing static - type checks and formatting code automatically. 
+Run all these tests with;
+
+```
+make ci
+```
+
+Bot is active on **@python_koin_bot** on Telegram
+
+
+### Prerequisites
+
+**1. Installing required packages**
+
+To test and use this codebase; AWS SAM, AWS CLI and Docker must be installed. Also, AWS CLI profile must be configured. 
+
+For install instructions and detailed guide:
+
+https://aws.amazon.com/tr/serverless/sam/
+
+**2. Env Variables**
+
+Running unit tests with Python requires env variables in a dotenv file. Example file: [.env.dist](.env.dist)
+
+To invoke Lambda function locally with [sam local](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-invoke.html), 
+SAM template file need env variables in env.json file. Example file: [.env.json.dist](.env.json.dist)
+
+To use this bot, you'll need a Telegram bot Token, and a CoinMarketCap API key to retrieve data from CMC.
+These variables must exist in environment variables. 
+
+* [CoinMarketCap API](https://pro.coinmarketcap.com/signup/)
+* [Telegram Bot Token](https://core.telegram.org/bots#creating-a-new-bot)
 
 ## :dart: Future Goals <a name = "goals"></a>
 
@@ -108,7 +137,7 @@ These information should be in a .env file on project root directory.
 
 
 ## 🎉 Acknowledgements <a name = "acknowledgement"></a>
-* [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot/) - Built using
-* [Stack Overflow](https://stackoverflow.com/) - For obvious reasons
 * [Telegram Bot Doc.](https://core.telegram.org/bots) - To understand basic bot commands and process
 * [CoinMarketCap API Doc.](https://coinmarketcap.com/api/) - Detailed information to use CMC API
+* [AWS SAM Reference](https://aws.amazon.com/tr/serverless/sam/) - SAM Documentation
+* [AWS Lambda Deployment with Github Actions](https://www.sufle.io/blog/aws-lambda-deployment-with-github-actions) - Github Action Deployment
