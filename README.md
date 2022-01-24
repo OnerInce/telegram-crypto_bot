@@ -80,7 +80,7 @@ sam deploy --guided
 Run Python unit tests
 
 ```
-pytest
+make test
 ```
 
 Invoke function locally using sample event (telegram bot message event)
