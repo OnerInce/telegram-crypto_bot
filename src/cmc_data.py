@@ -3,7 +3,7 @@ import json
 from requests import Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 
-from .settings import CMC_API_KEY
+from settings import CMC_API_KEY
 
 
 def get_coin_name_mappings():
