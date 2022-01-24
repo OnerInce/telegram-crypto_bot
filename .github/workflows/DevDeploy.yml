@@ -1,4 +1,4 @@
-name: Telegram Crypto Bot - Oner Ince
+name: Lambda Deployment
 on:
   push:
     branches:

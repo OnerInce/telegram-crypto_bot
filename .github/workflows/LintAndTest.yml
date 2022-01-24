@@ -1,4 +1,4 @@
-name: LintAndTest
+name: Python Code Check
 
 on:
   workflow_call:
