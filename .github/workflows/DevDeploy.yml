@@ -6,6 +6,9 @@ on:
 jobs:
   test-and-lint:
     uses: OnerInce/telegram-crypto_bot/.github/workflows/LintAndTest.yml@master
+    secrets:
+      CMC_KEY: ${{ secrets.CMC_KEY }}
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
   deploy-lambda:
     runs-on: ubuntu-latest
     needs: [test-and-lint]
