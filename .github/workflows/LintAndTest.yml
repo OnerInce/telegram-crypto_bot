@@ -2,6 +2,11 @@ name: LintAndTest
 
 on:
   workflow_call:
+    secrets:
+      CMC_KEY:
+        required: true
+      BOT_TOKEN:
+        required: true
 
 jobs:
   test:
