@@ -9,7 +9,6 @@
 
   ![Status](https://img.shields.io/badge/status-active-success.svg)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](/LICENSE)
-  ![example workflow](https://github.com/OnerInce/telegram-crypto_bot/actions/workflows/LintAndTest.yml/badge.svg)
   ![example workflow](https://github.com/OnerInce/telegram-crypto_bot/actions/workflows/DevDeploy.yml/badge.svg)
 
 </div>
