@@ -5,7 +5,7 @@ isort:
 	isort .
 
 type:
-	mypy --ignore-missing-imports --exclude /venv/ .
+	mypy -p src --ignore-missing-imports
 
 lint:
 	flake8 --max-line-length 120 ./src
