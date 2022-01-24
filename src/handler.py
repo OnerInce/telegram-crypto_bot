@@ -1,6 +1,10 @@
 import json
+import os
+import sys
 
 from utils import create_message, send_message
+
+sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 
 def lambda_handler(event, context):
