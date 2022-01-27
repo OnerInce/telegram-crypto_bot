@@ -1,3 +1,5 @@
+import requests
+
 import utils
 
 
@@ -8,7 +10,10 @@ def get_coin_name_btcturk(coin_symbol):
 
     btcturk_url = 'https://api.btcturk.com/api/v2/server/exchangeinfo'
 
-    info = utils.get_json_response(btcturk_url)
+    try:
+        info = utils.get_json_response(btcturk_url)
+    except requests.exceptions.RequestException:
+        return ''
 
     all_coins = info['data']['currencies']
 
