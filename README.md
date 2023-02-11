@@ -55,6 +55,8 @@ Bot currently supports 2 biggest Turkish exchanges : *Paribu and BTCTurk.*
 Telegram has a webhook functionality for bots, so every time a message sent to a bot it is possible to process that
 request information to an external API service. I have used AWS Lambda and AWS API Gateway for this purpose.
 
+<img width=800px height=480px align="center" src="diagram.png">
+
 ## 🎈 Usage <a name = "usage"></a>
 
 Verify template file:
