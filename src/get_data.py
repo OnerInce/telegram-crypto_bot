@@ -52,7 +52,7 @@ def get_coin_price(api_url, target_coin, is_coin_name_wanted):
         result_list = []
 
         for key, value in data.items():
-            if target_coin.lower() in key:
+            if target_coin.lower() == key.split("_")[0]:
                 price = value["last"]
                 change = float(value["percentage"])
 
