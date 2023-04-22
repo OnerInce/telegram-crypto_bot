@@ -58,7 +58,7 @@ def get_coin_price(api_url, target_coin, is_coin_name_wanted):
 
                 parity = key.split("_")[1]
 
-                if parity == "TL":
+                if parity.upper() == "TL":
                     parity = "TRY"
 
                 result_dict = {
