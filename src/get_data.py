@@ -24,33 +24,46 @@ def get_coin_name_btcturk(coin_symbol):
     return ''  # return empty if coin name not found
 
 
+def get_coin_name_paribu(coin_symbol):
+    """
+    try to get name of the coin from another endpoint of Paribu
+    """
+
+    paribu_url = 'https://web.paribu.com/initials/config'
+
+    try:
+        info = utils.get_json_response(paribu_url)
+    except requests.exceptions.RequestException:
+        return ''
+
+    coin_obj = info['payload']['currencies'].get(coin_symbol.lower())
+
+    return coin_obj["name"]
+
+
 def get_coin_price(api_url, target_coin, is_coin_name_wanted):
     # Get exchange data from APIs
-
     info = utils.get_json_response(api_url)
 
     if "paribu" in api_url:
-        coin_name = info["data"]["currencies"][target_coin.lower()]["name"]
+        data = info["payload"]
+        coin_name = get_coin_name_paribu(target_coin)
 
         result_list = []
 
-        for obj in info["data"]["ticker"]:
-            pair_name_split = obj.split("-")
-            base, counter = (
-                pair_name_split[0],
-                pair_name_split[1].upper(),
-            )
+        for key, value in data.items():
+            if target_coin.lower() in key:
+                price = value["last"]
+                change = float(value["percentage"])
 
-            if base.upper() == target_coin:
-                price = info["data"]["ticker"][obj]["c"]
-                change = info["data"]["ticker"][obj]["p"]
+                parity = key.split("_")[1]
 
-                if counter == "TL":
-                    counter = "TRY"
+                if parity == "TL":
+                    parity = "TRY"
 
                 result_dict = {
                     "exchange": "Paribu",
-                    "counter": counter,
+                    "counter": parity.upper(),
                     "price": price,
                     "change": change,
                 }
