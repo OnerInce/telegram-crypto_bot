@@ -34,11 +34,14 @@ def get_coin_name_paribu(coin_symbol):
     try:
         info = utils.get_json_response(paribu_url)
     except requests.exceptions.RequestException:
-        return ''
+        return None
 
-    coin_obj = info['payload']['currencies'].get(coin_symbol.lower())
+    try:
+        coin_obj = info['payload']['currencies'].get(coin_symbol.lower())
 
-    return coin_obj["name"]
+        return coin_obj["name"]
+    except TypeError:
+        return None
 
 
 def get_coin_price(api_url, target_coin, is_coin_name_wanted):
