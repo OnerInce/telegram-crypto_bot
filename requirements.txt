@@ -24,13 +24,13 @@ pyparsing==3.1.2
 pytest==8.2.2
 python-dotenv==1.0.1
 pytz==2024.1
-requests==2.32.2
+requests==2.32.4
 six==1.16.0
 toml==0.10.2
 tomli==2.0.1
-tornado==6.4
-types-requests==2.32.0.20240602
+tornado==6.5
+types-requests==2.32.4.20250611
 types-urllib3==1.26.25.14
 typing-extensions==4.12.2
 tzlocal==4.3
-urllib3==2.2.2
+urllib3==2.5.0
