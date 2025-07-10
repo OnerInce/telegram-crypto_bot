@@ -70,7 +70,7 @@ sam validate
 Build application:
 
 ```
-sam build --use-container
+sam build
 ```
 
 Deploy function to your own AWS account or Telegram bot:
