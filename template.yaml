@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   python3.8
@@ -28,7 +28,6 @@ Resources:
       Runtime: python3.8
       Environment:
         Variables:
-          CMC_KEY: !Ref CoinMarketCapAPIKey
           BOT_TOKEN: !Ref TelegramBotToken
       Architectures:
         - x86_64

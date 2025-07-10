@@ -7,7 +7,6 @@ jobs:
   test-and-lint:
     uses: OnerInce/telegram-crypto_bot/.github/workflows/LintAndTest.yml@master
     secrets:
-      CMC_KEY: ${{ secrets.CMC_KEY }}
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
   deploy-lambda:
     runs-on: ubuntu-latest
@@ -26,4 +25,4 @@ jobs:
       - name: SAM Validate
         run: sam validate
       - run: sam build --use-container
-      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --parameter-overrides ParameterKey=TelegramBotToken,ParameterValue=${{ secrets.BOT_TOKEN }} ParameterKey=CoinMarketCapAPIKey,ParameterValue=${{ secrets.CMC_KEY }}
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --parameter-overrides ParameterKey=TelegramBotToken,ParameterValue=${{ secrets.BOT_TOKEN }}
