@@ -28,7 +28,7 @@ requests==2.25.1
 six==1.15.0
 toml==0.10.2
 tomli==1.2.3
-tornado==6.1
+tornado==6.5
 types-requests==2.27.7
 types-urllib3==1.26.7
 typing-extensions==4.0.1
