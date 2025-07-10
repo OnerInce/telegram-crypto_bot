@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  python3.8
+  python3.13
 
   SAM Template for telegram-crypto-bot
 
@@ -25,12 +25,12 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: handler.lambda_handler
-      Runtime: python3.8
+      Runtime: python3.13
       Environment:
         Variables:
           BOT_TOKEN: !Ref TelegramBotToken
       Architectures:
-        - x86_64
+        - arm64
       Events:
         CryptoBot:
           Type: Api
