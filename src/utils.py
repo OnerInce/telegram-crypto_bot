@@ -1,6 +1,7 @@
 import datetime
 import decimal
 import os
+from json.decoder import JSONDecodeError
 
 import requests
 
@@ -8,8 +9,6 @@ from get_data import get_coin_price
 from settings import API_URLS
 from style_message import style_message
 from translate import translate
-
-from json.decoder import JSONDecodeError
 
 
 def get_json_response(request_url):
@@ -43,7 +42,11 @@ def create_message(coin_input, lang, user_name):
     for url in API_URLS:
         try:
             parse_result, coin_name_from_exchange = get_coin_price(url, coin_symbol, is_coin_name_required)
-        except (requests.exceptions.RequestException, KeyError, JSONDecodeError):  # exchange API unreachable or coin not in exchange
+        except (
+            requests.exceptions.RequestException,
+            KeyError,
+            JSONDecodeError,
+        ):  # exchange API unreachable or coin not in exchange
             continue
 
         # get name of the coin
