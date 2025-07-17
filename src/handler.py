@@ -1,9 +1,32 @@
 import json
+import os
 
 from utils import create_message, send_message
 
 
+def validate_webhook_secret(event):
+    """
+    Validate the webhook secret token from Telegram
+    Returns True if valid, False otherwise
+    """
+    expected_secret = os.environ.get('TELEGRAM_WEBHOOK_SECRET')
+
+    if not expected_secret:
+        # If no secret is configured, skip validation
+        return True
+
+    # Get the secret token from headers
+    headers = event.get('headers', {})
+    received_secret = headers.get('X-Telegram-Bot-Api-Secret-Token')
+
+    return received_secret == expected_secret
+
+
 def lambda_handler(event, context):
+    # Validate webhook secret token
+    if not validate_webhook_secret(event):
+        return {'statusCode': 401, 'body': json.dumps({'error': 'Invalid webhook secret token'})}
+
     message = json.loads(event['body'])
 
     chat_id = message['message']['chat']['id']

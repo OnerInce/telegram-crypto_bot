@@ -199,3 +199,4 @@ dmypy.json
 cython_debug/
 
 .vscode
+.env.json
