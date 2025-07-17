@@ -14,6 +14,11 @@ Parameters:
     Type: String
     Description: >-
       CoinMarketCap API Key to map coin symbols to coin names
+  TelegramWebhookSecret:
+    Type: String
+    Description: >-
+      Secret token for webhook validation from Telegram
+    Default: ""
 
 Globals:
   Function:
@@ -29,6 +34,7 @@ Resources:
       Environment:
         Variables:
           BOT_TOKEN: !Ref TelegramBotToken
+          TELEGRAM_WEBHOOK_SECRET: !Ref TelegramWebhookSecret
       Architectures:
         - arm64
       Events:
