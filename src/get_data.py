@@ -1,6 +1,10 @@
+import logging
+
 import requests
 
 import utils
+
+logger = logging.getLogger(__name__)
 
 
 def get_coin_name_btcturk(coin_symbol):
@@ -12,7 +16,8 @@ def get_coin_name_btcturk(coin_symbol):
 
     try:
         info = utils.get_json_response(btcturk_url)
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as e:
+        logger.warning(f"Failed to get coin name from BTCTurk for {coin_symbol}: {str(e)}")
         return ''
 
     all_coins = info['data']['currencies']
@@ -33,7 +38,8 @@ def get_coin_name_paribu(coin_symbol):
 
     try:
         info = utils.get_json_response(paribu_url)
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as e:
+        logger.warning(f"Failed to get coin name from Paribu for {coin_symbol}: {str(e)}")
         return None
 
     try:
