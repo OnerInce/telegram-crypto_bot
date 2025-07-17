@@ -35,6 +35,7 @@ Resources:
         Variables:
           BOT_TOKEN: !Ref TelegramBotToken
           TELEGRAM_WEBHOOK_SECRET: !Ref TelegramWebhookSecret
+          LOG_LEVEL: INFO
       Architectures:
         - arm64
       Events:
