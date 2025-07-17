@@ -25,4 +25,4 @@ jobs:
       - name: SAM Validate
         run: sam validate
       - run: sam build
-      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --parameter-overrides ParameterKey=TelegramBotToken,ParameterValue=${{ secrets.BOT_TOKEN }}
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --parameter-overrides ParameterKey=TelegramBotToken,ParameterValue=${{ secrets.BOT_TOKEN }} ParameterKey=TelegramWebhookSecret,ParameterValue=${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
