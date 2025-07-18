@@ -21,7 +21,7 @@ def validate_webhook_secret(event):
 
     # Get the secret token from headers
     headers = event.get('headers', {})
-    received_secret = headers.get('X-Telegram-Bot-Api-Secret-Token')
+    received_secret = headers.get('x-telegram-bot-api-secret-token')
 
     is_valid = received_secret == expected_secret
     if not is_valid:
@@ -45,7 +45,8 @@ def lambda_handler(event, context):
         chat_id = message['message']['chat']['id']
         user_text = message['message']['text']
 
-        logger.info(f"Processing message from chat_id: {chat_id}, command: {user_text}")
+        logger.info(
+            f"Processing message from chat_id: {chat_id}, command: {user_text}")
 
         if user_text == '/start':
             send_message('Hi! Welcome to Bot. You can use /help', chat_id)
@@ -63,7 +64,8 @@ def lambda_handler(event, context):
         name = message['message']['chat']['first_name']
         message_lang = message['message']['from']['language_code']
 
-        logger.info(f"Processing crypto query for coin: {user_text}, user: {name}")
+        logger.info(
+            f"Processing crypto query for coin: {user_text}, user: {name}")
         reply = create_message(user_text, message_lang, name)
         send_message(reply, chat_id)
         logger.info(f"Successfully sent crypto data to chat_id: {chat_id}")
