@@ -33,4 +33,4 @@ types-requests==2.32.4.20250611
 types-urllib3==1.26.25.14
 typing-extensions==4.12.2
 tzlocal==4.3
-urllib3==2.5.0
+urllib3==2.6.0
