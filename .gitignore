@@ -200,3 +200,5 @@ cython_debug/
 
 .vscode
 .env.json
+.DS_Store
+.aws-sam/

@@ -6,6 +6,6 @@ stack_name = "telegram-crypto-bot"
 s3_bucket = "oner-sam-bucket"
 region = "eu-west-1"
 confirm_changeset = true
-capabilities = "CAPABILITY_IAM"
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
 disable_rollback = true
 image_repositories = []
