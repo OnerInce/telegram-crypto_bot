@@ -29,7 +29,7 @@ This is a Telegram bot that provides real-time cryptocurrency prices from Turkis
 ### Local Development
 ```bash
 # Install dependencies
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 
 # Run tests
 make test

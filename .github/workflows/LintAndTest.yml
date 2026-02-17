@@ -21,7 +21,7 @@ jobs:
       - name: Install deps
         run: |
           pip install -U pip
-          pip install -r requirements.txt
+          pip install -r src/requirements.txt
       - name: Run tests
         run: make test
         env:
@@ -41,6 +41,6 @@ jobs:
       - name: Install deps
         run: |
           pip install -U pip
-          pip install -r requirements.txt
+          pip install -r src/requirements.txt
       - name: Lint asnd type check
         run: make ci
