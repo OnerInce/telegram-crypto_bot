@@ -10,10 +10,6 @@ Parameters:
     Type: String
     Description: >-
       Token of Telegram bot obtained from BotFather
-  CoinMarketCapAPIKey:
-    Type: String
-    Description: >-
-      CoinMarketCap API Key to map coin symbols to coin names
   TelegramWebhookSecret:
     Type: String
     Description: >-

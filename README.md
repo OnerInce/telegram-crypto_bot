@@ -47,7 +47,7 @@ Bot currently supports 2 biggest Turkish exchanges : _Paribu and BTCTurk._
   - Changed database structure for faster response times
 - August 2021
   - Deployed to AWS Lambda
-  - Instead of CMC, now getting coin names from exchange APIs when possible (one less request)
+  - Getting coin names directly from exchange APIs (no external CMC dependency)
 - January 2022
   - Now using AWS SAM to deploy Lambda, instead of manually uploading zip file :-)
   - Created GitHub Actions Workflows to automatic deployment and tests
@@ -128,7 +128,6 @@ SAM template file need env variables in env.json file. Example file: [.env.json.
 To use this bot, you'll need a Telegram bot Token
 Any secrets must exist in environment variables.
 
-- [CoinMarketCap API](https://pro.coinmarketcap.com/signup/)
 - [Telegram Bot Token](https://core.telegram.org/bots#creating-a-new-bot)
 
 ## :dart: Future Goals <a name = "goals"></a>

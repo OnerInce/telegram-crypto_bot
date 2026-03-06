@@ -75,7 +75,6 @@ sam local start-api --env-vars env.json
 
 ### Required Environment Variables
 - `BOT_TOKEN`: Telegram bot token from BotFather
-- `CMC_API_KEY`: CoinMarketCap API key (optional, for coin name mapping)
 
 ### Configuration Files
 - `.env.json`: Environment variables for local SAM testing
