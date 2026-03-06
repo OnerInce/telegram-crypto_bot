@@ -173,9 +173,6 @@ Resources:
                   - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/telegram-crypto-bot-*"
 
 Outputs:
-  CryptoBotApi:
-    Description: "API Gateway endpoint URL for Prod stage for CryptoBot function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getPrice/"
   CryptoBotFunction:
     Description: "Telegram Crypto Bot Lambda Function"
     Value: !GetAtt CryptoBotFunction.Arn
